@@ -1,18 +1,22 @@
-import time 
+import time
 import json
 import os
-import vlc 
+import vlc
 
-class offline():
-    def __init__(self):
+class offline:
+    def __init__(self, path_f=None):
         from user.menu import MENUSKA
         self.menu = MENUSKA()
-        try:
-            with open('user/settings.json', 'r') as f:
-                self.data = json.load(f)
-                self.path = self.data.get('last_path', '')
-        except:
-            self.path = ""
+        
+        if path_f:
+            self.path = path_f
+        else:
+            try:
+                with open('user/settings.json', 'r', encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.path = data.get('last_path', '')
+            except:
+                self.path = ""
 
         self.library = {}
         self.playlist = [] 
@@ -25,6 +29,10 @@ class offline():
         self.library = {}
         self.playlist = [] 
         
+        if not os.path.exists(self.path):
+            print(f"Folder {self.path} not found!")
+            return
+
         for root, dirs, files in os.walk(self.path):
             songs = [f for f in files if f.lower().endswith(ex)]
             if songs:
@@ -35,16 +43,13 @@ class offline():
 
     def display(self):
         if not self.library:
+            print("No music found.")
+            input("Press Enter...")
             self.menu.offline_menu()
             return
         
-        global_index = 1
-        for folder, songs in self.library.items():
-            print(f"Folder: {folder}")
-            for song in songs:
-                print(f"  {global_index}. {song}")
-                global_index += 1
         self.menu.offline_play_menu(self)
+
     def play(self, index):
         if 0 <= index < len(self.playlist):
             self.current_index = index
@@ -54,12 +59,14 @@ class offline():
             print(f"▶ Playing: {os.path.basename(self.playlist[self.current_index])}")
 
     def next(self):
-        self.current_index = (self.current_index + 1) % len(self.playlist)
-        self.play(self.current_index)
+        if self.playlist:
+            self.current_index = (self.current_index + 1) % len(self.playlist)
+            self.play(self.current_index)
 
     def prev(self):
-        self.current_index = (self.current_index - 1) % len(self.playlist)
-        self.play(self.current_index)
+        if self.playlist:
+            self.current_index = (self.current_index - 1) % len(self.playlist)
+            self.play(self.current_index)
 
     def stop(self):
         self.player.stop()
