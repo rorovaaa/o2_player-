@@ -1,4 +1,6 @@
 {
-    "last_path": "music",
-    "api_key": " "
+    "last_path": "/home/user/music",
+    "api_key": "",
+    "albums": "/home/user/Музыка/альбомы",
+    "last_selected_album": ""
 }
